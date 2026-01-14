@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 900px;">
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-person-circle fs-2 me-2"></i>
+            <h2 class="fw-bold mb-0">My Dietary Profile</h2>
+        </div>
+        <p class="text-muted mb-4">This information will be used automatically across all features to personalize your experience.</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label fw-bold small">Allergies (comma-separated)</label>
+                {{ form.allergies }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold small">Dietary Restrictions (comma-separated)</label>
+                {{ form.restrictions }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold small">Health Goals (comma-separated)</label>
+                {{ form.health_goals }}
+            </div>
+
+            <button type="submit" class="btn rounded-pill px-4 text-white fw-bold d-flex align-items-center" style="background-color: #2dd4bf;">
+                <i class="bi bi-save me-2"></i> Save Profile
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

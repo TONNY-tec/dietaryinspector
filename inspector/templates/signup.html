@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-overlay">
+    <div class="auth-card shadow-lg">
+        <a href="{% url 'index' %}" class="close-btn text-decoration-none">&times;</a>
+        <h4 class="fw-bold mb-1">Join DietaryInspector</h4>
+        <p class="text-muted small mb-4">Create an account to unlock full AI analysis.</p>
+        
+        <div class="btn-toggle-group">
+            <a href="{% url 'login' %}" class="btn-toggle inactive text-decoration-none text-center">Login</a>
+            <button class="btn-toggle active">Sign Up</button>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="text-muted" style="font-size: 0.7rem;">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="teal-btn mt-3">Create Account</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

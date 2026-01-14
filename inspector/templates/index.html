@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="display-4 fw-bold">DietaryInspector For Food Safety </h1>
+    <p class="text-muted lead">Analyze products, detect allergens, and get personalized recommendations<br> 
+    with DietaryInspector. Make informed choices about your food, effortlessly.</p>
+<div class="container py-5 text-center">
+    
+    <h5 class="fw-bold">Product Safety Analyzer</h5>
+        <p class="small text-muted">Enter a product name to get a personalized AI analysis based on your saved dietary profile.</p>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <input type="text" name="product_name" class="form-control" placeholder="Enter food...">
+            <br>
+            <button type="submit" class="btn btn-primary-custom px-4 py-2 rounded-3 shadow-sm">
+                Analyze Product
+            </button>
+        </form>
+        <br>
+
+    {% if result %}
+    <div class="card shadow-lg border-0 rounded-4 p-4 mx-auto text-start" style="max-width: 800px;">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center border-end">
+                <p class="small fw-bold text-muted text-uppercase mb-1">Safety Rating</p>
+                {% if result.rating == "Red" %}
+                    <i class="bi bi-exclamation-triangle-fill display-1 text-danger"></i>
+                    <h3 class="text-danger fw-bold">Not Recommended</h3>
+                {% elif result.rating == "Amber" %}
+                    <i class="bi bi-shield-exclamation display-1 text-warning"></i>
+                    <h3 class="text-warning fw-bold">Caution</h3>
+                {% else %}
+                    <i class="bi bi-check-circle-fill display-1 text-success"></i>
+                    <h3 class="text-success fw-bold">Safe</h3>
+                {% endif %}
+            </div>
+
+            <div class="col-md-4 text-center border-end">
+                <p class="small fw-bold text-muted text-uppercase mb-1">Health Score</p>
+                <div class="position-relative d-inline-block">
+                    <h2 class="fw-bold mt-4">{{ result.score }}/100</h2>
+                    <p class="small text-muted">Nutritional Value</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <p class="small fw-bold text-muted text-uppercase mb-1">AI Analysis</p>
+                <p class="mb-0">{{ result.summary }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+    <div class="mt-5 pt-5">
+        <span class="badge bg-light text-danger border mb-3">Key Features</span>
+        <h2 class="fw-bold mb-4">Eat Smarter, Not Harder</h2>
+        <p class="text-muted mb-5">From your kitchen to your favorite restaurant, DietaryInspector<br>
+        provides the clarity you need to eat with confidence.</p>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm text-start">
+                    <div class="card-body">
+                        <div class="mb-3 fs-3 text-info">🔍</div>
+                        <h6 class="fw-bold">Instant Product Analysis</h6>
+                        <p class="small text-muted">Get an immediate safety rating for any food product.</p>
+                    </div>
+                    <img src="https://via.placeholder.com/300x150?text=Product+Scanning" class="card-img-bottom" alt="Product Analysis">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm text-start">
+                    <div class="card-body">
+                        <div class="mb-3 fs-3 text-primary">🚫</div>
+                        <h6 class="fw-bold">Comprehensive Allergen Detection</h6>
+                        <p class="small text-muted">Identify potential allergens lurking in ingredient lists.</p>
+                    </div>
+                    <img src="https://via.placeholder.com/300x150?text=Allergen+Detection" class="card-img-bottom" alt="Allergens">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm text-start">
+                    <div class="card-body">
+                        <div class="mb-3 fs-3 text-success">❤️</div>
+                        <h6 class="fw-bold">In-Depth Health Scoring</h6>
+                        <p class="small text-muted">Understand the nutritional value with an easy-to-read health score.</p>
+                    </div>
+                    <img src="https://via.placeholder.com/300x150?text=Health+Scoring" class="card-img-bottom" alt="Health Score">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm text-start">
+                    <div class="card-body">
+                        <div class="mb-3 fs-3 text-info">📖</div>
+                        <h6 class="fw-bold">Restaurant Menu Safety</h6>
+                        <p class="small text-muted">Dine out confidently by analyzing menus for safe options.</p>
+                    </div>
+                    <img src="https://via.placeholder.com/300x150?text=Menu+Analysis" class="card-img-bottom" alt="Menu Safety">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
