@@ -1,0 +1,36 @@
+# --- Python/Django ---
+# Ignore compiled Python files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Virtual Environments
+venv/
+env/
+.venv/
+bin/
+lib/
+include/
+
+# --- Database (SQLite) ---
+# Your local database should not be uploaded
+db.sqlite3
+db.sqlite3-journal
+
+# --- Environment Secrets (CRITICAL) ---
+# This protects your Gemini API Key and SECRET_KEY
+.env
+local_settings.py
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+# Useful if you ever run debug logs
+*.log
+
+# --- Media and Static ---
+# Optional: if you have user-uploaded files later
+media/
+staticfiles/
