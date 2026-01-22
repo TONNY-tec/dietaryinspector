@@ -129,7 +129,7 @@ STATIC_URL = 'static/'
 
 # --- Gemini AI Configuration ---
 # Replace the string below with your actual API key from Google AI Studio
-GEMINI_API_KEY = 'AIzaSyBdoeY_ewZ8dvKzVNVYNCGZJZrFWhw1Fzg' 
+GEMINI_API_KEY = '..add your gemini key here..' 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 # Optional: Set a default model version if you plan to use it in multiple places
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
