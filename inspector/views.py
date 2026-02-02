@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileUpdateForm
 
-from .utils import get_ai_analysis
+from .utils import get_ai_analysis, detect_allergens_logic
+
 
 # Create your views here.
 def index(request):
@@ -78,3 +79,28 @@ def profile_view(request):
     return render(request, 'profile.html', {'form': form})
 
 
+@login_required
+def allergen_detector_view(request):
+    results = {"general": [], "critical": []}
+    ingredients = ""
+    has_searched = False
+
+    if request.method == 'POST':
+        ingredients = request.POST.get('ingredients', '').strip()
+        if ingredients:
+            # 1. Fetch the user's profile for personalization
+            profile = request.user.userprofile
+            profile_data = {
+                'allergies': profile.allergies,
+                'restrictions': profile.restrictions
+            }
+            
+            # 2. Pass profile data to the logic function
+            results = detect_allergens_logic(ingredients, profile_data)
+            has_searched = True
+
+    return render(request, 'allergen.html', {
+        'results': results, # Now contains both general and critical
+        'ingredients': ingredients,
+        'has_searched': has_searched
+    })
