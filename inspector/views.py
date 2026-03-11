@@ -1,12 +1,14 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login, authenticate, logout
 from django.contrib.auth import logout as auth_logout
 from .forms import StyledLoginForm, StyledSignupForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from .forms import ProfileUpdateForm
-
-from .utils import get_ai_analysis, detect_allergens_logic
+from django.http import JsonResponse
+from .utils import get_ai_analysis, detect_allergens_logic, analyze_food_label
 
 
 # Create your views here.
@@ -104,3 +106,48 @@ def allergen_detector_view(request):
         'ingredients': ingredients,
         'has_searched': has_searched
     })
+
+
+def scanner_page(request):
+    """Renders the HTML page with the camera UI"""
+    return render(request, 'scanner.html')
+
+@csrf_exempt # Use this for testing, but ideally use CSRF tokens in production
+def scan_api(request):
+    if request.method == 'POST':
+        try:
+            # Check if the body is empty
+            if not request.body:
+                return JsonResponse({"verdict": "ERROR", "analysis": "No data received"}, status=400)
+
+            data = json.loads(request.body)
+            image_data = data.get('image')
+
+            if not image_data:
+                return JsonResponse({"verdict": "ERROR", "analysis": "No image found in request"}, status=400)
+
+            # Define user_info so the code doesn't crash if Profile is missing
+            user_info = "User has general health interests. Check for common allergens like nuts, dairy, and gluten."
+
+            # Optional: Try to get real user profile if it exists
+            if request.user.is_authenticated:
+                try:
+                    user_info = f"Allergies: {request.user.userprofile.allergies}. Restrictions: {request.user.userprofile.restrictions}. Health Goals: {request.user.userprofile.health_goals}"
+                except AttributeError:
+                    pass # Fallback to default user_info if userprofile doesn't exist for some reason
+
+            # Call the AI logic from utils.py
+            ai_response_raw = analyze_food_label(image_data, user_info)
+
+            # Clean and parse the AI response
+            clean_json = ai_response_raw.replace('```json', '').replace('```', '').strip()
+            result = json.loads(clean_json)
+
+            return JsonResponse(result)
+
+        except Exception as e:
+            # This prints the error to your Cloud Shell terminal so you can see it!
+            print(f"--- SCANNER ERROR: {str(e)} ---")
+            return JsonResponse({"verdict": "ERROR", "analysis": f"Backend Error: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Only POST requests allowed"}, status=405)

@@ -30,11 +30,14 @@ SECRET_KEY = 'django-insecure-m3zz^udr4-7+)x=cr)&xnemn5x3_dh=2*d4=1jmvv-%*(6nd4(
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 CSRF_TRUSTED_ORIGINS = [
+    'https://8000-cs-887488950989-default.cs-europe-west1-onse.cloudshell.dev',
     'https://8000-cs-887488950989-default.cs-europe-west1-xedi.cloudshell.dev',
 ]
 
+# This tells Django that the request is secure even if it's coming through a proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# --- MODIFICATION END ---
 
 # Application definition
 
