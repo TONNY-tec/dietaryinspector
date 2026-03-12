@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm border-0 rounded-4 p-4 mx-auto" style="max-width: 900px; background-color: #f8fdfd;">
+        <h2 class="fw-bold mb-1">Allergen Detector</h2>
+        <p class="text-muted mb-4">Paste a list of ingredients to identify potential allergens.</p>
+
+        <form method="POST" id="detectorForm">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="form-label fw-bold small">Ingredients List</label>
+                <textarea name="ingredients" class="form-control border-0 shadow-sm p-3" rows="6" 
+                          placeholder="e.g., Flour, Sugar, Eggs, Milk, Peanuts..." required>{{ ingredients }}</textarea>
+            </div>
+
+            <button type="submit" class="btn rounded-3 px-4 py-2 text-white fw-bold d-flex align-items-center" 
+                    style="background-color: #2dd4bf;" onclick="showLoading()">
+                <i class="bi bi-slash-circle me-2"></i> Detect Allergens
+            </button>
+        </form>
+
+        <div id="loadingState" class="text-center py-5 d-none">
+            <div class="spinner-border text-info" role="status"></div>
+            <p class="mt-2 text-muted">AI is scanning ingredients...</p>
+        </div>
+
+        {% if has_searched %}
+        <div class="mt-4">
+           {% if results.critical %}
+             <div class="alert alert-danger border-0 rounded-4">
+             <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Personal Danger Detected!</h6>
+                 <div class="d-flex flex-wrap gap-2">
+                 {% for item in results.critical %}
+                     <span class="badge bg-danger">{{ item }}</span>
+                  {% endfor %}
+               </div>
+                <p class="small mt-2 mb-0">These match the allergies listed in your profile.</p>
+            </div>
+            {% endif %}
+ 
+           <h6 class="fw-bold text-muted mt-3">Other Potential Allergens:</h6>
+           <div class="d-flex flex-wrap gap-2">
+                 {% for item in results.general %}
+                <span class="badge bg-secondary-subtle text-dark border">{{ item }}</span>
+                 {% empty %}
+                 <p class="text-success small">No other common allergens detected.</p>
+                {% endfor %}
+           </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function showLoading() {
+        const form = document.getElementById('detectorForm');
+        if(form.checkValidity()) {
+            document.getElementById('loadingState').classList.remove('d-none');
+        }
+    }
+</script>
+{% endblock %}

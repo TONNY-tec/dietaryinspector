@@ -1,6 +1,9 @@
 import google.generativeai as genai
 import json
 import re
+import base64
+import io
+from PIL import Image
 from django.conf import settings
 
 def get_ai_analysis(product_name, profile_data):
@@ -39,30 +42,60 @@ def get_ai_analysis(product_name, profile_data):
         print(f"Parsing error: {e}")
         return {"rating": "Red", "score": 0, "summary": "Could not analyze this product."}
 
-def detect_allergens_logic(ingredients_text):
+def detect_allergens_logic(ingredients_text, profile_data):
     """
-    Expert AI scan of raw ingredient text to find hidden allergens.
+    Personalized AI scan comparing ingredients against the user's specific profile.
     """
     genai.configure(api_key=settings.GEMINI_API_KEY)
     model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
     
+    # We include user profile context in the prompt
     prompt = f"""
-    You are a food safety expert. Scan the following ingredient list for potential allergens:
+    You are a food safety expert. Scan the following ingredient list:
     "{ingredients_text}"
 
-    Instructions:
-    1. Identify common allergens (Milk, Eggs, Peanuts, Tree Nuts, Fish, Shellfish, Soy, Wheat, etc.).
-    2. Identify hidden derivatives (e.g., Whey = Milk, Lecithin = Soy).
-    3. Return ONLY a comma-separated list of the allergen names found.
-    4. If none are found, return the word "None".
+    USER PROFILE:
+    - Allergies: {profile_data.get('allergies')}
+    - Restrictions: {profile_data.get('restrictions')}
+
+    INSTRUCTIONS:
+    1. Identify general allergens (Milk, Eggs, Peanuts, Wheat, etc.).
+    2. Identify specific ingredients that conflict with the USER PROFILE.
+    3. Return a JSON object with two lists:
+       - "general": Common allergens found.
+       - "critical": Allergens specifically matching the user's profile.
+    
+    Format: {{"general": ["item1"], "critical": ["item2"]}}
+    If none, return empty lists.
     """
     
-    response = model.generate_content(prompt)
-    result = response.text.strip()
-    
-    # Handle empty or "None" responses from AI
-    if result.lower() == "none" or not result:
-        return []
-        
-    # Clean and split the comma-separated string into a Python list
-    return [item.strip() for item in result.split(',')]
+    try:
+        response = model.generate_content(prompt)
+        # Extract JSON using RegEx to handle any extra AI text
+        import re, json
+        match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        return {"general": [], "critical": []}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"general": [], "critical": []}
+
+def analyze_food_image(base64_str, user_profile):
+    genai.configure(api_key=settings.GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+
+    # Remove header
+    if "," in base64_str:
+        base64_str = base64_str.split(",")[1]
+
+    img_data = base64.b64decode(base64_str)
+    img = Image.open(io.BytesIO(img_data))
+
+    prompt = f"""
+    Analyze this food label. User profile: {user_profile}.
+    Return JSON ONLY: {{"verdict": "SAFE/UNSAFE", "analysis": "Reason"}}
+    """
+
+    response = model.generate_content([prompt, img])
+    return response.text
