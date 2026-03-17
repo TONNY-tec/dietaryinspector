@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Smart Recommendations</h2>
+    
+    <div class="card p-4 mb-4">
+        <label>What are you craving? (Leave blank for general suggestions)</label>
+        <input type="text" id="foodQuery" class="form-control" placeholder="e.g. Italian food, breakfast snacks...">
+        <button onclick="getRecommendations()" class="btn btn-primary mt-3">Get Advice</button>
+    </div>
+
+    <div id="resultsArea" class="row">
+        </div>
+</div>
+
+<script>
+function getRecommendations() {
+    const query = document.getElementById('foodQuery').value;
+    const resultsArea = document.getElementById('resultsArea');
+    resultsArea.innerHTML = "<p>Analyzing your profile...</p>";
+
+    fetch('/recommend-api/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ query: query })
+    })
+    .then(res => res.json())
+    .then(data => {
+        resultsArea.innerHTML = "";
+        data.forEach(item => {
+            resultsArea.innerHTML += `
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border-success">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">${item.food_name}</h5>
+                            <p><strong>Why:</strong> ${item.reason_why}</p>
+                            <p class="text-muted"><small><strong>Comparison:</strong> ${item.comparison}</small></p>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    });
+}
+</script>
+{% endblock %}

@@ -83,7 +83,7 @@ def detect_allergens_logic(ingredients_text, profile_data):
 
 def analyze_food_image(base64_str, user_profile):
     genai.configure(api_key=settings.GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
 
     # Remove header
     if "," in base64_str:
@@ -99,3 +99,34 @@ def analyze_food_image(base64_str, user_profile):
 
     response = model.generate_content([prompt, img])
     return response.text
+
+def get_ai_recommendations(user_query, user_profile):
+    genai.configure(api_key=settings.GEMINI_API_KEY)
+    model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
+    
+    # If the user_query is empty, it's a "Pure Recommendation" request
+    mode_instruction = "Provide 3 general healthy food recommendations."
+    if user_query:
+        mode_instruction = f"The user specifically wants to eat: {user_query}. Evaluate if these are safe and suggest the best alternatives if they are not."
+
+    prompt = f"""
+    User Profile: {user_profile}
+    Context: {mode_instruction}
+    
+    Task: 
+    1. Identify the best foods for this user.
+    2. Explain WHY they are the best (medical/nutritional reasoning).
+    3. Explain WHY other similar common foods should be avoided.
+    
+    Return ONLY a JSON list of objects:
+    [
+        {{
+            "food_name": "Name",
+            "reason_why": "Explanation",
+            "comparison": "Why this is better than [X]"
+        }}
+    ]
+    """
+    
+    response = model.generate_content(prompt)
+    return response.text.replace('```json', '').replace('```', '').strip()

@@ -1,0 +1,12 @@
+# Web Framework
+django>=5.1.0
+
+# AI and API
+google-generativeai
+
+# Image Processing (Required for utils.py to handle camera data)
+pillow
+python-dotenv
+
+# Utilities
+requests
