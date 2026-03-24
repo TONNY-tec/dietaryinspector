@@ -116,14 +116,12 @@ def get_ai_recommendations(user_query, user_profile):
     Task: 
     1. Identify the best foods for this user.
     2. Explain WHY they are the best (medical/nutritional reasoning).
-    3. Explain WHY other similar common foods should be avoided.
     
     Return ONLY a JSON list of objects:
     [
         {{
             "food_name": "Name",
             "reason_why": "Explanation",
-            "comparison": "Why this is better than [X]"
         }}
     ]
     """

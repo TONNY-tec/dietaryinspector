@@ -1,23 +1,38 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h2>Smart Recommendations</h2>
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary">Smart Recommendations 🥗</h2>
+        <p class="text-muted">AI-powered suggestions tailored to your specific allergies and goals.</p>
+    </div>
     
-    <div class="card p-4 mb-4">
-        <label>What are you craving? (Leave blank for general suggestions)</label>
-        <input type="text" id="foodQuery" class="form-control" placeholder="e.g. Italian food, breakfast snacks...">
-        <button onclick="getRecommendations()" class="btn btn-primary mt-3">Get Advice</button>
+    <div class="card shadow-sm border-0 p-4 mb-5 bg-light">
+        <label class="form-label fw-bold">What are you craving?</label>
+        <div class="input-group">
+            <input type="text" id="foodQuery" class="form-control form-control-lg" placeholder="e.g. Italian food, healthy snacks...">
+            <button onclick="getRecommendations()" class="btn btn-primary btn-lg">
+                <i class="fas fa-magic"></i> Get Advice
+            </button>
+        </div>
+        <div id="loading" class="mt-3 text-center" style="display:none;">
+            <div class="spinner-grow text-primary" role="status"></div>
+            <p class="mt-2 text-primary fw-bold">Consulting Gemini AI...</p>
+        </div>
     </div>
 
     <div id="resultsArea" class="row">
-        </div>
+        <!-- AI Results will appear here -->
+    </div>
 </div>
 
 <script>
 function getRecommendations() {
     const query = document.getElementById('foodQuery').value;
     const resultsArea = document.getElementById('resultsArea');
-    resultsArea.innerHTML = "<p>Analyzing your profile...</p>";
+    const loading = document.getElementById('loading');
+    
+    resultsArea.innerHTML = "";
+    loading.style.display = "block";
 
     fetch('/recommend-api/', {
         method: 'POST',
@@ -26,20 +41,42 @@ function getRecommendations() {
     })
     .then(res => res.json())
     .then(data => {
-        resultsArea.innerHTML = "";
+        loading.style.display = "none";
+        if (!Array.isArray(data)) {
+            resultsArea.innerHTML = `<div class="alert alert-warning">AI could not format the list. Please try again.</div>`;
+            return;
+        }
+
         data.forEach(item => {
+            const emoji = item.vibe_emoji || "✨";
             resultsArea.innerHTML += `
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 border-success">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow border-0 hover-lift">
+                        <div class="card-header bg-white border-0 pt-4 text-center">
+                            <div class="display-4">${emoji}</div>
+                        </div>
                         <div class="card-body">
-                            <h5 class="card-title text-success">${item.food_name}</h5>
-                            <p><strong>Why:</strong> ${item.reason_why}</p>
-                            <p class="text-muted"><small><strong>Comparison:</strong> ${item.comparison}</small></p>
+                            <h5 class="card-title fw-bold text-success text-center">${item.food_name}</h5>
+                            <hr>
+                            <p class="card-text"><strong>Why:</strong> ${item.reason_why}</p>
                         </div>
                     </div>
                 </div>`;
         });
+    })
+    .catch(err => {
+        loading.style.display = "none";
+        resultsArea.innerHTML = `<div class="alert alert-danger">Error connecting to AI. Please check your terminal.</div>`;
     });
 }
 </script>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out;
+    }
+    .hover-lift:hover {
+        transform: translateY(-10px);
+    }
+</style>
 {% endblock %}

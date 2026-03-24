@@ -1,17 +1,17 @@
 <div class="scanner-container text-center p-4">
     <!-- Camera Preview Area -->
     <div id="cameraWrapper" class="mb-3" style="display:none;">
-        <video id="video" width="100%" height="auto" autoplay playsinline class="rounded border"></video>
+        <video id="video" width="100%" height="auto" autoplay playsinline class="rounded border shadow-sm"></video>
         <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
     <!-- Action Buttons -->
-    <div class="d-grid gap-2 col-6 mx-auto">
-        <button id="startCameraButton" class="btn btn-primary btn-lg">
+    <div class="d-grid gap-2 col-md-6 mx-auto">
+        <button id="startCameraButton" class="btn btn-primary btn-lg shadow-sm">
             <i class="fas fa-camera"></i> Open Scanner
         </button>
         
-        <button id="captureButton" class="btn btn-success btn-lg" style="display:none;">
+        <button id="captureButton" class="btn btn-success btn-lg shadow-sm" style="display:none;">
             <i class="fas fa-dot-circle"></i> Capture & Analyze
         </button>
 
@@ -24,17 +24,18 @@
     </div>
 
     <!-- Results Display -->
-    <div id="scanResult" class="mt-4 p-3 rounded" style="display:none;">
-        <h4 id="verdictTitle"></h4>
-        <p id="analysisText"></p>
+    <div id="scanResult" class="mt-4 p-4 rounded shadow-sm animate__animated animate__fadeIn" style="display:none;">
+        <div id="emojiDisplay" class="display-1 mb-2"></div>
+        <h4 id="verdictTitle" class="fw-bold"></h4>
+        <p id="analysisText" class="lead"></p>
     </div>
 
     <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="mt-3" style="display:none;">
-        <div class="spinner-border text-primary" role="status">
+    <div id="loadingSpinner" class="mt-4" style="display:none;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Loading...</span>
         </div>
-        <p>AI is analyzing ingredients...</p>
+        <p class="mt-2 fw-bold text-primary">AI is analyzing ingredients...</p>
     </div>
 </div>
 
@@ -94,7 +95,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken') // Ensure CSRF is handled
+                'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({ image: base64Image })
         })
@@ -113,14 +114,32 @@
         resultDiv.style.display = 'block';
         const title = document.getElementById('verdictTitle');
         const text = document.getElementById('analysisText');
+        const emojiDiv = document.getElementById('emojiDisplay');
         
-        title.innerText = data.verdict;
-        text.innerText = data.analysis;
+        // Handle logic for both old and new API versions
+        const verdict = data.verdict || data.rating || "UNKNOWN";
+        const analysis = data.analysis || data.summary || "";
+        
+        // Emoji Logic mapping
+        let emoji = data.emoji || "";
+        if (!emoji) {
+            if (verdict === 'SAFE' || verdict === 'Green') emoji = "😊";
+            else if (verdict === 'CAUTION' || verdict === 'Amber') emoji = "⚠️";
+            else if (verdict === 'UNSAFE' || verdict === 'Red') emoji = "🤢";
+        }
 
-        // Color coding based on AI verdict
-        resultDiv.className = "mt-4 p-3 rounded " + 
-            (data.verdict === 'SAFE' ? 'bg-success text-white' : 
-             data.verdict === 'UNSAFE' ? 'bg-danger text-white' : 'bg-warning text-dark');
+        emojiDiv.innerText = emoji;
+        title.innerText = verdict;
+        text.innerText = analysis;
+
+        // Visual feedback via colors
+        if (verdict === 'SAFE' || verdict === 'Green') {
+            resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-success text-white";
+        } else if (verdict === 'UNSAFE' || verdict === 'Red') {
+            resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-danger text-white";
+        } else {
+            resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-warning text-dark";
+        }
     }
 
     function getCookie(name) {

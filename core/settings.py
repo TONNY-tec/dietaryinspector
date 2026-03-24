@@ -91,6 +91,19 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mysql.connector.django',
+#         'NAME': 'dietary',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': '127.0.0.1', # Use '127.0.0.1' or the Cloud SQL Connection Name
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -132,7 +145,7 @@ STATIC_URL = 'static/'
 
 # --- Gemini AI Configuration ---
 # Replace the string below with your actual API key from Google AI Studio
-GEMINI_API_KEY = '' 
+GEMINI_API_KEY = 'AIzaSyBtYspvnxYtoIs1sJdKT-9Bvxno00KPMVM'
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 # Optional: Set a default model version if you plan to use it in multiple places
 GEMINI_MODEL_NAME = "gemini-2.5-flash"

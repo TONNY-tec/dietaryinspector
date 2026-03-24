@@ -154,7 +154,7 @@ def scan_api(request):
 #             # This print will show the REAL error in your Cloud Shell terminal
 #             print(f"Server-side Error: {str(e)}")
 #             return JsonResponse({"verdict": "ERROR", "analysis": str(e)}, status=500)
-
+@login_required
 def recommendation_page(request):
     return render(request, 'recommendation.html')
 
