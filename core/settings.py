@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import dj_database_url
+
 
 load_dotenv()
 
@@ -29,7 +31,7 @@ SECRET_KEY = 'django-insecure-m3zz^udr4-7+)x=cr)&xnemn5x3_dh=2*d4=1jmvv-%*(6nd4(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.cloudshell.dev',
@@ -85,10 +87,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 # DATABASES = {
@@ -139,13 +141,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = 'static/'
 
 # core/settings.py
 
 # --- Gemini AI Configuration ---
 # Replace the string below with your actual API key from Google AI Studio
-GEMINI_API_KEY = 'AIzaSyBtYspvnxYtoIs1sJdKT-9Bvxno00KPMVM'
+GEMINI_API_KEY = ''
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 # Optional: Set a default model version if you plan to use it in multiple places
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
