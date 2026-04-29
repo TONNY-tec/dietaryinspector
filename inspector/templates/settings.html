@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-4"><i class="fas fa-cog me-2"></i>Account Settings</h2>
+
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold">Update Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ u_form.as_p }}
+                        <button type="submit" name="update_profile" class="btn btn-teal px-4">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="fw-bold">Security & Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ p_form.as_p }}
+                        <button type="submit" name="change_password" class="btn btn-outline-primary px-4">Update Password</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card border-danger border-1 shadow-sm mb-4" style="border-radius: 15px;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-danger">Danger Zone</h5>
+                        <p class="text-muted mb-0 small">Deleting your account will remove all your scan history and premium benefits.</p>
+                    </div>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Are you absolutely sure?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    This action is permanent and cannot be undone. All data for <strong>{{ user.username }}</strong> will be purged.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="delete_account" class="btn btn-danger">Confirm Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-teal { background-color: #198754; color: white; }
+    .btn-teal:hover { background-color: #157347; color: white; }
+</style>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0 rounded-4 p-4 mb-4">
+                <h3 class="fw-bold mb-3 text-start"><span class="me-2">📩</span> Contact & Suggestions</h3>
+                <p class="text-muted text-start small mb-4">Have a query or a feature suggestion? Let us know! Our team typically responds within 24 hours.</p>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success border-0 rounded-3 shadow-sm">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted text-uppercase mb-1">Full Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted text-uppercase mb-1">Email Address</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted text-uppercase mb-1">Subject</label>
+                        {{ form.subject }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted text-uppercase mb-1">Message</label>
+                        {{ form.message }}
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold rounded-3 shadow-sm">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+
+            <div class="card border-0 bg-light rounded-4 p-4">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="text-primary fs-3">
+                        <i class="bi bi-shield-check"></i> 🛡️
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Data Protection & Privacy Trust</h6>
+                        <p class="text-muted small mb-2">
+                            In compliance with the <strong>Data Protection Act (2019) of the Republic of Kenya</strong>, 
+                            DietaryInspector guarantees that your personal details and health-related queries are handled 
+                            with the highest level of confidentiality.
+                        </p>
+                        <ul class="list-unstyled small text-muted">
+                            <li class="mb-1">✅ <strong>Purpose Limitation:</strong> Details are only used to address your specific query.</li>
+                            <li class="mb-1">✅ <strong>Data Minimization:</strong> we only collect the information necessary to assist you.</li>
+                            <li class="mb-1">✅ <strong>Secure Storage:</strong> All submissions are encrypted in accordance with ODPC standards.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-0">Welcome back, {{ user.username }}!</h2>
+                <p class="text-muted">Manage your dietary profile and subscription status below.</p>
+            </div>
+            <a href="{% url 'settings' %}" class="btn shadow-sm setting-icon-wrapper" title="Account Settings">
+                <img src="{% static 'images/images.png' %}" alt="Settings" style="width: 100%; height: 100%; object-fit: contain;">
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+                <div class="card-body text-center">
+                    <div class="mb-3"><i class="fas fa-user-circle fa-4x text-teal"></i></div>
+                    <h5 class="card-title">Profile Info</h5>
+                    <p class="mb-1"><strong>Email:</strong> {{ user.email }}</p>
+                    <p class="mb-1 text-success"><i class="fas fa-check-circle"></i> Verified Account</p>
+                    <a href="{% url 'settings' %}" class="btn btn-link text-teal p-0 mt-2 small">Update Details</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+                <div class="card-body text-center">
+                    <div class="mb-3"><i class="fas fa-barcode fa-4x text-primary"></i></div>
+                    <h5 class="card-title">Usage Statistics</h5>
+                    <h2 class="display-4 fw-bold text-primary">{{ profile.daily_scan_count }}</h2>
+                    <p class="text-muted">Scans performed </p>
+                    <div class="progress mt-3" style="height: 10px;">
+                        {% if profile.is_premium %}
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%">Unlimited</div>
+                        {% else %}
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ profile.daily_scan_count|add:'0' }}0%"></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; background-color: #f8f9fa;">
+                <div class="card-body text-center">
+                    <div class="mb-3"><i class="fas fa-crown fa-4x {% if profile.is_premium %}text-warning{% else %}text-muted{% endif %}"></i></div>
+                    <h5 class="card-title">Subscription</h5>
+                    {% if profile.is_premium %}
+                        <span class="badge bg-warning text-dark mb-3">ACTIVE PREMIUM</span>
+                        <p class="mb-0"><strong>Expires on:</strong></p>
+                        <p class="text-danger fw-bold">{{ profile.subscription_end_date|date:"d M, Y" }}</p>
+                    {% else %}
+                        <span class="badge bg-secondary mb-3">FREE TIER</span>
+                        <p class="text-muted">Upgrade to unlock unlimited daily scans.</p>
+                        <a href="{% url 'pricing' %}" class="btn btn-warning w-100 mt-2 shadow-sm">Go Premium</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-4">
+            <h4 class="fw-bold mb-3"><i class="fas fa-history me-2 text-teal"></i>Recommendation History</h4>
+            <div class="accordion shadow-sm" id="recommendationAccordion" style="border-radius: 15px; overflow: hidden;">
+                
+                {% for rec in recommendations %}
+                <div class="accordion-item border-0 mb-2 shadow-sm rounded-4 overflow-hidden position-relative">
+                    <div class="d-flex align-items-center bg-white justify-content-between">
+                        
+                        <h2 class="accordion-header flex-grow-1" id="heading{{ rec.id }}">
+                            <button class="accordion-button collapsed fw-bold shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ rec.id }}" aria-expanded="false">
+                                <i class="far fa-calendar-alt me-2 text-muted"></i> {{ rec.created_at|date:"d M, Y - H:i" }}
+                            </button>
+                        </h2>
+                        
+                        <div class="pe-3" style="z-index: 10;">
+                            <form action="{% url 'delete_recommendation' rec.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this record?');" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link text-danger p-0 delete-btn border-0 shadow-none" title="Delete History">
+                                    <i class="fas fa-trash-alt fa-lg">Delete</i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="collapse{{ rec.id }}" class="accordion-collapse collapse" data-bs-parent="#recommendationAccordion">
+                        <div class="accordion-body bg-light border-top">
+                            <div class="mb-3">
+                                <h6 class="text-primary fw-bold small text-uppercase">Question / Query:</h6>
+                                <p class="mb-0 text-dark">{{ rec.query_text }}</p>
+                            </div>
+                            <hr class="text-muted opacity-25">
+                            <div>
+                                <h6 class="text-success fw-bold small text-uppercase">AI Analysis:</h6>
+                                <div class="p-3 bg-white border-start border-success border-4 rounded shadow-sm">
+                                    {{ rec.recommendation_text|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center p-5 bg-light rounded" style="border: 2px dashed #dee2e6;">
+                    <i class="fas fa-info-circle text-muted fa-2x mb-3"></i>
+                    <p class="text-muted">No recommendations found yet. Start scanning to see your history!</p>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-teal { color: #198754; }
+    
+    .setting-icon-wrapper {
+        border-radius: 50%; width: 50px; height: 50px; 
+        background-color: #e8f5e9; border: 1px solid #c8e6c9;
+        padding: 0; overflow: hidden; transition: 0.3s all ease;
+    }
+    .setting-icon-wrapper:hover { transform: rotate(45deg); }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa;
+        color: #198754;
+        box-shadow: none;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+    }
+
+    .accordion-button::after {
+        margin-right: 35px;
+    }
+
+    .accordion-item {
+        border: 1px solid #eee !important;
+    }
+
+    .delete-btn {
+        transition: transform 0.2s ease;
+        text-decoration: none;
+        display: block;
+    }
+    .delete-btn:hover {
+        transform: scale(1.2);
+        color: #dc3545 !important;
+    }
+</style>
+{% endblock %}

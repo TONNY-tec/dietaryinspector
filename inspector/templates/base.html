@@ -96,6 +96,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Product Safety</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'allergen' %}">Allergens ditect</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'recommendations' %}">Recommendations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact Us</a></li>
                 </ul>
             </div>
             <div class="d-flex align-items-center ms-auto">
@@ -108,6 +109,8 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item small text-danger" href="{% url 'logout' %}">Logout</a></li>
                             <li><a class="dropdown-item small text-success" href="{% url 'profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item small text-success" href="{% url 'dashboard' %}">My dashboard</a></li>
+                            <li><a class="dropdown-item small text-success" href="{% url 'settings' %}">Settings</a></li>
                         </ul>
                     </div>
                 {% else %}
@@ -134,9 +137,26 @@
 
     {% block content %}{% endblock %}
 
-    <footer class="text-center py-4 mt-5 text-muted small">
-        © 2026 DietaryInspector. All rights reserved.
-    </footer>
+   <footer class="py-4 mt-5 text-muted small">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="p-3 border-start border-4 border-warning bg-warning bg-opacity-10 rounded-2 mb-3 text-start">
+                    <p class="text-dark mb-0 fw-bold" style="font-size: 0.75rem;">
+                        ⚠️ MEDICAL DISCLAIMER: This site is for technical support and general suggestions. 
+                        If you are experiencing a severe allergic reaction or medical emergency, please contact 
+                        Emergency Services (999/112) or visit the nearest health facility immediately.
+                    </p>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <p class="mb-0">&copy; 2026 DietaryInspector. All rights reserved.</p>
+                    <p class="text-xs">In compliance with the Kenya Data Protection Act (2019)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

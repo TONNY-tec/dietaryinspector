@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">Upgrade to DietaryInspector <span class="text-primary">Premium</span></h1>
+        <p class="text-muted lead">Unlock advanced AI reasoning, voice consultation, and a safer dining experience.</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 mb-3 text-center justify-content-center">
+        <div class="col" style="max-width: 400px;">
+            <div class="card mb-4 rounded-4 shadow-sm border-0">
+                <div class="card-header py-3 bg-white border-0">
+                    <h4 class="my-0 fw-bold">Basic</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">KSh 0<small class="text-muted fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4 text-start px-3">
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> 3 Product Scans per day</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> Standard Safety Ratings</li>
+                        <li><i class="bi bi-x-circle-fill text-danger me-2"></i> No Guardian Voice Chat</li>
+                        <li><i class="bi bi-x-circle-fill text-danger me-2"></i> No Restaurant Menu Scan</li>
+                    </ul>
+                    <button type="button" class="btn btn-lg btn-outline-secondary w-100 rounded-3" disabled>Current Plan</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col" style="max-width: 400px;">
+            <div class="card mb-4 rounded-4 shadow-lg border-primary">
+                <div class="card-header py-3 bg-primary text-white border-0 rounded-top-4">
+                    <h4 class="my-0 fw-bold">Premium 🛡️</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">KSh 499<small class="text-muted fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4 text-start px-3">
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Unlimited</strong> AI Scans</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Guardian Voice Chat</strong></li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> Detailed E-Number Analysis</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i> Restaurant Menu Safety Mode</li>
+                    </ul>
+                    
+                    <button type="button" class="btn btn-lg btn-primary w-100 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        Get Started with M-Pesa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/M-PESA_LOGO-01.svg/512px-M-PESA_LOGO-01.svg.png" alt="M-Pesa" class="mb-3" style="height: 50px;">
+                    <h5 class="fw-bold">Pay via Lipa Na M-Pesa</h5>
+                    <p class="small text-muted mb-4">Enter your Safaricom number below. You will receive an STK Push on your phone to authorize the KSh 499 payment.</p>
+                    
+                    <form id="payment-form">
+                        <div class="mb-3 text-start">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" class="form-control form-control-lg rounded-3" placeholder="0712345678" id="phone_number">
+                        </div>
+                        <button type="button" onclick="initiateSTKPush()" class="btn btn-success btn-lg w-100 rounded-3 fw-bold py-3">
+                            Pay Now
+                        </button>
+                    </form>
+                    <div id="payment-status" class="mt-3 small d-none">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        Waiting for M-Pesa confirmation...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function initiateSTKPush() {
+        const phone = document.getElementById('phone_number').value;
+        const statusDiv = document.getElementById('payment-status');
+        
+        if(!phone) return alert("Please enter your M-Pesa number");
+
+        statusDiv.classList.remove('d-none');
+        
+        // This is where you call your backend M-Pesa view (Daraja API)
+        try {
+            const response = await fetch('/api/payment/mpesa/stk-push/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ phone: phone })
+            });
+            
+            if(response.ok) {
+                // Poll for payment success
+                statusDiv.innerText = "Prompt sent! Check your phone.";
+            }
+        } catch (e) {
+            statusDiv.innerText = "Error initiating payment. Try again.";
+        }
+    }
+</script>
+{% endblock %}

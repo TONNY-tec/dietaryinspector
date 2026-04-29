@@ -1,11 +1,9 @@
 <div class="scanner-container text-center p-4">
-    <!-- Camera Preview Area -->
     <div id="cameraWrapper" class="mb-3" style="display:none;">
         <video id="video" width="100%" height="auto" autoplay playsinline class="rounded border shadow-sm"></video>
         <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
-    <!-- Action Buttons -->
     <div class="d-grid gap-2 col-md-6 mx-auto">
         <button id="startCameraButton" class="btn btn-primary btn-lg shadow-sm">
             <i class="fas fa-camera"></i> Open Scanner
@@ -15,22 +13,21 @@
             <i class="fas fa-dot-circle"></i> Capture & Analyze
         </button>
 
-        <!-- New Upload Button -->
         <button id="uploadTrigger" class="btn btn-outline-secondary">
             <i class="fas fa-file-upload"></i> Upload Image
         </button>
-        <!-- Hidden File Input -->
         <input type="file" id="fileInput" accept="image/*" style="display:none;">
     </div>
 
-    <!-- Results Display -->
     <div id="scanResult" class="mt-4 p-4 rounded shadow-sm animate__animated animate__fadeIn" style="display:none;">
         <div id="emojiDisplay" class="display-1 mb-2"></div>
         <h4 id="verdictTitle" class="fw-bold"></h4>
         <p id="analysisText" class="lead"></p>
+        <div id="upgradeLinkContainer" class="mt-3" style="display:none;">
+            <a id="upgradeUrl" href="#" class="btn btn-warning fw-bold shadow-sm">Upgrade to Premium</a>
+        </div>
     </div>
 
-    <!-- Loading Spinner -->
     <div id="loadingSpinner" class="mt-4" style="display:none;">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
             <span class="visually-hidden">Loading...</span>
@@ -67,11 +64,12 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg');
+        
+        // FIX: Increased quality to 0.9 to help AI read text better
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
         sendToApi(imageData);
     });
 
-    // 2. Upload Logic
     uploadTrigger.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', (e) => {
@@ -86,10 +84,11 @@
         reader.readAsDataURL(file);
     });
 
-    // 3. Shared API Function
+    // 3. UPDATED API Function: Fixes "JSON.parse" error and handles limits
     function sendToApi(base64Image) {
         loading.style.display = 'block';
         resultDiv.style.display = 'none';
+        document.getElementById('upgradeLinkContainer').style.display = 'none';
 
         fetch('/scan-api/', {
             method: 'POST',
@@ -99,15 +98,50 @@
             },
             body: JSON.stringify({ image: base64Image })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(async response => {
+            // Check if the response is actually JSON before parsing
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const textError = await response.text();
+                throw new Error("Server sent a non-JSON response. Check Python terminal.");
+            }
+
+            const data = await response.json();
+            
+            if (response.status === 403) {
+                loading.style.display = 'none';
+                handleLimitReached(data);
+                return;
+            }
+            
+            if (!response.ok) throw new Error(data.analysis || "Server Error");
+
             loading.style.display = 'none';
             displayResult(data);
         })
         .catch(error => {
             loading.style.display = 'none';
-            alert("Error connecting to server. Check terminal logs.");
+            console.error("Technical Detail:", error);
+            // This prevents the "Line 1 Column 1" crash by showing a clear message
+            alert("Connection Error: " + error.message);
         });
+    }
+
+    function handleLimitReached(data) {
+        resultDiv.style.display = 'block';
+        resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-dark text-white";
+        
+        document.getElementById('emojiDisplay').innerText = "🔒";
+        document.getElementById('verdictTitle').innerText = "Limit Reached";
+        document.getElementById('analysisText').innerText = (data.analysis || "") + " " + (data.suggestion || "");
+        
+        const upgradeLink = document.getElementById('upgradeLinkContainer');
+        const upgradeUrl = document.getElementById('upgradeUrl');
+        
+        if (data.upgrade_url) {
+            upgradeUrl.href = data.upgrade_url;
+            upgradeLink.style.display = 'block';
+        }
     }
 
     function displayResult(data) {
@@ -116,26 +150,24 @@
         const text = document.getElementById('analysisText');
         const emojiDiv = document.getElementById('emojiDisplay');
         
-        // Handle logic for both old and new API versions
         const verdict = data.verdict || data.rating || "UNKNOWN";
         const analysis = data.analysis || data.summary || "";
         
-        // Emoji Logic mapping
         let emoji = data.emoji || "";
         if (!emoji) {
-            if (verdict === 'SAFE' || verdict === 'Green') emoji = "😊";
-            else if (verdict === 'CAUTION' || verdict === 'Amber') emoji = "⚠️";
-            else if (verdict === 'UNSAFE' || verdict === 'Red') emoji = "🤢";
+            if (verdict === 'SAFE' || verdict === 'Green' || verdict === 'Safe') emoji = "😊";
+            else if (verdict === 'CAUTION' || verdict === 'Amber' || verdict === 'Caution') emoji = "⚠️";
+            else if (verdict === 'UNSAFE' || verdict === 'Red' || verdict === 'Unsafe') emoji = "🤢";
         }
 
         emojiDiv.innerText = emoji;
         title.innerText = verdict;
         text.innerText = analysis;
 
-        // Visual feedback via colors
-        if (verdict === 'SAFE' || verdict === 'Green') {
+        // Visual feedback logic
+        if (verdict === 'SAFE' || verdict === 'Green' || verdict === 'Safe') {
             resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-success text-white";
-        } else if (verdict === 'UNSAFE' || verdict === 'Red') {
+        } else if (verdict === 'UNSAFE' || verdict === 'Red' || verdict === 'Unsafe') {
             resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-danger text-white";
         } else {
             resultDiv.className = "mt-4 p-4 rounded shadow-sm bg-warning text-dark";

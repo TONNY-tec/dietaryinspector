@@ -2,12 +2,12 @@
 
 {% block content %}
 <div class="container text-center mt-5">
-    <h1 class="display-4 fw-bold">DietaryInspector For Food Safety </h1>
+    <h1 class="display-4 fw-bold">DietaryInspector For Food Safety</h1>
     <p class="text-muted lead">Analyze products, detect allergens, and get personalized recommendations<br> 
     with DietaryInspector. Make informed choices about your food, effortlessly.</p>
-<div class="container py-5 text-center">
-    
-    <h5 class="fw-bold">Product Safety Analyzer</h5>
+
+    <div class="container py-5 text-center">
+        <h5 class="fw-bold">Product Safety Analyzer</h5>
         <p class="small text-muted">Enter a product name to get a personalized AI analysis based on your saved dietary profile.</p>
         <form action="" method="POST">
             {% csrf_token %}
@@ -18,45 +18,109 @@
             </button>
         </form>
         <br>
-        
-<br>
 
-    {% if result %}
-    <div class="card shadow-lg border-0 rounded-4 p-4 mx-auto text-start" style="max-width: 800px;">
-        <div class="row align-items-center">
-            <div class="col-md-4 text-center border-end">
-                <p class="small fw-bold text-muted text-uppercase mb-1">Safety Rating</p>
-                {% if result.rating == "Red" %}
-                    <i class="bi bi-exclamation-triangle-fill display-1 text-danger"></i>
-                    <h3 class="text-danger fw-bold">Not Recommended</h3>
-                {% elif result.rating == "Amber" %}
-                    <i class="bi bi-shield-exclamation display-1 text-warning"></i>
-                    <h3 class="text-warning fw-bold">Caution</h3>
-                {% else %}
-                    <i class="bi bi-check-circle-fill display-1 text-success"></i>
-                    <h3 class="text-success fw-bold">Safe</h3>
-                {% endif %}
-            </div>
+        {% if result %}
+        <div class="card shadow-lg border-0 rounded-4 p-4 mx-auto text-start" style="max-width: 800px;">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center border-end">
+                    <p class="small fw-bold text-muted text-uppercase mb-1">Safety Rating</p>
+                    {% if result.rating == "Red" %}
+                        <i class="bi bi-exclamation-triangle-fill display-1 text-danger"></i>
+                        <h3 class="text-danger fw-bold">Not Recommended</h3>
+                    {% elif result.rating == "Amber" %}
+                        <i class="bi bi-shield-exclamation display-1 text-warning"></i>
+                        <h3 class="text-warning fw-bold">Caution</h3>
+                    {% else %}
+                        <i class="bi bi-check-circle-fill display-1 text-success"></i>
+                        <h3 class="text-success fw-bold">Safe</h3>
+                    {% endif %}
+                </div>
 
-            <div class="col-md-4 text-center border-end">
-                <p class="small fw-bold text-muted text-uppercase mb-1">Health Score</p>
-                <div class="position-relative d-inline-block">
-                    <h2 class="fw-bold mt-4">{{ result.score }}/100</h2>
-                    <p class="small text-muted">Nutritional Value</p>
+                <div class="col-md-4 text-center border-end">
+                    <p class="small fw-bold text-muted text-uppercase mb-1">Health Score</p>
+                    <div class="position-relative d-inline-block">
+                        <h2 class="fw-bold mt-4">{{ result.score }}/100</h2>
+                        <p class="small text-muted">Nutritional Value</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <p class="small fw-bold text-muted text-uppercase mb-1">AI Analysis</p>
+                    <p class="mb-0">{{ result.summary }}</p>
                 </div>
             </div>
+        </div>
+        {% endif %}
+    </div>
 
-            <div class="col-md-4">
-                <p class="small fw-bold text-muted text-uppercase mb-1">AI Analysis</p>
-                <p class="mb-0">{{ result.summary }}</p>
+    <!-- START OF GUARDIAN VOICE CHAT COMPONENT -->
+    <div class="mt-4">
+    <div class="max-w-md mx-auto p-4 bg-white rounded-4 shadow-sm border border-light position-relative" id="guardian-section" style="max-width: 500px;">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0"><span class="me-2">🛡️</span> Guardian Voice Chat</h5>
+            {% if user.userprofile.is_premium %}
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem;">
+                    <i class="bi bi-star-fill me-1"></i> PREMIUM
+                </span>
+            {% else %}
+                <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem;">
+                    <i class="bi bi-lock-fill me-1"></i> BASIC
+                </span>
+            {% endif %}
+        </div>
+        
+        <div class="mb-3">
+            <label class="small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.7rem;">Target Product</label>
+            <input id="v-product" type="text" class="form-control mb-2 form-control-sm" placeholder="e.g. Indomie Noodles">
+            
+            <label class="small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.7rem;">Your Query</label>
+            <div class="input-group">
+                <input id="v-query" type="text" class="form-control" placeholder="Ask the Guardian...">
+                
+                {% if user.userprofile.is_premium %}
+                    <button class="btn btn-outline-primary" type="button" id="mic-trigger">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                {% else %}
+                    <button class="btn btn-outline-secondary" type="button" onclick="location.href='/pricing/'" title="Unlock Voice with Premium">
+                        <i class="bi bi-mic-mute-fill"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.userprofile.is_premium %}
+            <button onclick="runGuardianTalk()" id="v-ask-btn" class="btn btn-dark w-100 rounded-3 py-2 fw-bold shadow-sm">
+                Ask Guardian
+            </button>
+        {% else %}
+            <a href="/pricing/" class="btn btn-outline-dark w-100 rounded-3 py-2 fw-bold border-2">
+                <i class="bi bi-gem me-2 text-primary"></i> Upgrade to Ask Guardian
+            </a>
+            <p class="text-center text-muted mt-2" style="font-size: 0.65rem;">
+                Voice reasoning and allergen deep-scans are premium features.
+            </p>
+        {% endif %}
+
+        <div id="v-result" class="mt-3 p-3 rounded-3 d-none text-start" style="font-size: 0.9rem; border-width: 2px;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span id="v-badge" class="badge rounded-pill"></span>
+                <span id="v-emoji" class="fs-4"></span>
+            </div>
+            <p id="v-summary" class="mb-2 text-dark"></p>
+            <div class="p-2 bg-white bg-opacity-75 rounded-2 border border-white shadow-sm">
+                <small class="d-block fw-bold text-primary mb-1 text-uppercase" style="font-size: 0.7rem;">Dietary Suggestion:</small>
+                <span id="v-alt" class="fw-bold text-dark"></span>
             </div>
         </div>
     </div>
-    {% endif %}
 </div>
-<div class="mt-4">
-            {% include 'scanner_componet.html' %}
-        </div>
+    <!-- END OF GUARDIAN VOICE CHAT COMPONENT -->
+
+    <div class="mt-4">
+        {% include 'scanner_componet.html' %}
+    </div>
 
     <div class="mt-5 pt-5">
         <span class="badge bg-light text-danger border mb-3">Key Features</span>
@@ -108,4 +172,60 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Voice Recognition Logic
+    const micBtn = document.getElementById('mic-trigger');
+    const queryInput = document.getElementById('v-query');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        micBtn.onclick = () => {
+            recognition.start();
+            micBtn.classList.replace('btn-outline-primary', 'btn-danger');
+        };
+        recognition.onresult = (e) => {
+            queryInput.value = e.results[0][0].transcript;
+            micBtn.classList.replace('btn-danger', 'btn-outline-primary');
+        };
+        recognition.onspeechend = () => recognition.stop();
+        recognition.onerror = () => micBtn.classList.replace('btn-danger', 'btn-outline-primary');
+    }
+
+    // API Interaction
+    async function runGuardianTalk() {
+        const product = document.getElementById('v-product').value;
+        const query = queryInput.value;
+        const resultBox = document.getElementById('v-result');
+
+        if (!product || !query) return;
+
+        resultBox.classList.remove('d-none');
+        document.getElementById('v-summary').innerText = "Analyzing your dietary safety...";
+
+        const response = await fetch('/api/guardian/talk/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({ product, query })
+        });
+
+        const data = await response.json();
+        
+        document.getElementById('v-summary').innerText = data.summary;
+        document.getElementById('v-emoji').innerText = data.emoji;
+        document.getElementById('v-alt').innerText = data.alternative;
+        document.getElementById('v-badge').innerText = data.rating;
+
+        // Dynamic Colors
+        const themes = {
+            'Green': 'bg-success bg-opacity-10 text-success border-success',
+            'Amber': 'bg-warning bg-opacity-10 text-dark border-warning',
+            'Red': 'bg-danger bg-opacity-10 text-danger border-danger'
+        };
+        resultBox.className = `mt-3 p-3 rounded-3 border ${themes[data.rating] || themes.Amber}`;
+        const badge = document.getElementById('v-badge');
+        badge.className = `badge rounded-pill ${data.rating === 'Amber' ? 'bg-warning text-dark' : 'bg-' + data.rating.toLowerCase()}`;
+    }
+</script>
 {% endblock %}

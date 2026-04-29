@@ -1,0 +1,91 @@
+<div class="max-w-md mx-auto p-6 bg-white rounded-3xl shadow-xl border border-gray-100 mt-10">
+    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span class="text-2xl">🛡️</span> Guardian Voice Chat
+    </h3>
+    
+    <div class="space-y-4">
+        <div class="relative">
+            <input id="query-input" type="text" placeholder="Ask something... (e.g. Is this keto?)" 
+                   class="w-full p-3 pr-12 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-500">
+            <button id="mic-btn" class="absolute right-2 top-2 p-1.5 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </button>
+        </div>
+
+        <button onclick="sendToGuardian()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
+            Ask Guardian
+        </button>
+    </div>
+
+    <!-- Dynamic Result Area -->
+    <div id="guardian-result" class="hidden mt-6 p-4 rounded-2xl border-2">
+        <div class="flex justify-between items-start mb-2">
+            <span id="res-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase"></span>
+            <span id="res-emoji" class="text-2xl"></span>
+        </div>
+        <p id="res-summary" class="text-gray-700 text-sm leading-relaxed mb-3"></p>
+        <div id="res-alt-box" class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+            <p class="text-xs text-blue-600 font-bold mb-1 uppercase tracking-wider">Try this instead:</p>
+            <p id="res-alt" class="text-blue-800 font-semibold"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const micBtn = document.getElementById('mic-btn');
+    const queryInput = document.getElementById('query-input');
+
+    // Speech Recognition Setup
+    const recognition = window.SpeechRecognition || window.webkitSpeechRecognition ? new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null;
+    
+    if (recognition) {
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            queryInput.value = transcript;
+            micBtn.classList.remove('animate-pulse', 'bg-red-100', 'text-red-600');
+        };
+
+        micBtn.onclick = () => {
+            recognition.start();
+            micBtn.classList.add('animate-pulse', 'bg-red-100', 'text-red-600');
+        };
+    } else {
+        micBtn.style.display = 'none'; // Hide if browser doesn't support
+    }
+
+    async function sendToGuardian() {
+        const product = document.getElementById('product-input').value;
+        const query = document.getElementById('query-input').value;
+        const resultDiv = document.getElementById('guardian-result');
+
+        if (!product || !query) return alert("Please enter a product and a question.");
+
+        const response = await fetch('/api/guardian/talk/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({product, query})
+        });
+
+        const data = await response.json();
+        
+        // UI Updates
+        resultDiv.classList.remove('hidden');
+        document.getElementById('res-summary').innerText = data.summary;
+        document.getElementById('res-emoji').innerText = data.emoji;
+        document.getElementById('res-alt').innerText = data.alternative;
+        document.getElementById('res-badge').innerText = data.rating;
+        
+        // Color coding
+        const colors = {
+            'Green': {bg: 'bg-green-50', border: 'border-green-200', badge: 'bg-green-100 text-green-700'},
+            'Amber': {bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700'},
+            'Red': {bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-100 text-red-700'}
+        };
+        
+        const style = colors[data.rating] || colors.Amber;
+        resultDiv.className = `mt-6 p-4 rounded-2xl border-2 ${style.bg} ${style.border}`;
+        document.getElementById('res-badge').className = `px-3 py-1 rounded-full text-xs font-bold uppercase ${style.badge}`;
+    }
+</script>

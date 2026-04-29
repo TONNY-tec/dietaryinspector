@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import dj_database_url
+# import dj_database_url
 
 # Load environment variables from .env file (for local development)
 load_dotenv()
@@ -79,22 +79,31 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # --- DATABASE CONFIGURATION ---
 # Uses Render's DATABASE_URL if available, otherwise defaults to local SQLite
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+#         conn_max_age=600
+#     )
+# }
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
+
 # --- STATIC FILES (WhiteNoise) ---
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Storage engine that compresses and caches static files for performance
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- AI & EXTERNAL API CONFIGURATION ---
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+# GEMINI_MODEL_NAME = 'gemini-1.5-flash-latest'
 GEMINI_MODEL_NAME = "gemini-2.5-flash"
 
 # --- AUTHENTICATION REDIRECTS ---
@@ -118,3 +127,12 @@ else:
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- EMAIL CONFIGURATION ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'tonnysafari3@gmail.com' # Your email
+EMAIL_HOST_PASSWORD = 'nbjx aygz nauz mkno'

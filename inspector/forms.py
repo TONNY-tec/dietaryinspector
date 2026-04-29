@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, ContactMessage
 
 # Create your models here.
 
@@ -27,6 +27,18 @@ class StyledSignupForm(UserCreationForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control bg-light border-0 py-2'})
 
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control bg-light border-0 py-2'})
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = UserProfile
@@ -35,4 +47,15 @@ class ProfileUpdateForm(forms.ModelForm):
             'allergies': forms.TextInput(attrs={'class': 'form-control bg-light border-0 py-2', 'placeholder': 'e.g., Peanuts, Dairy, Shellfish'}),
             'restrictions': forms.TextInput(attrs={'class': 'form-control bg-light border-0 py-2', 'placeholder': 'e.g., Gluten-Free, Vegan, Low-FODMAP'}),
             'health_goals': forms.TextInput(attrs={'class': 'form-control bg-light border-0 py-2', 'placeholder': 'e.g., Weight loss, Muscle gain'}),
+        }
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = ContactMessage
+        fields = ['name', 'email', 'subject', 'message']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Your Email'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Subject'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Your Suggestion or Query'}),
         }
