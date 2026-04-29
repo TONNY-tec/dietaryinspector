@@ -135,4 +135,4 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tonnysafari3@gmail.com' # Your email
-EMAIL_HOST_PASSWORD = 'nbjx aygz nauz mkno'
+EMAIL_HOST_PASSWORD = ''
