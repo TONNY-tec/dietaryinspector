@@ -1,12 +1,16 @@
+
 # Web Framework
-django>=5.1.0
+django>=4.2,<5.0
 
-# AI and API
-google-generativeai
+# AI and API Integration
+google-generativeai>=0.4.0
 
-# Image Processing (Required for utils.py to handle camera data)
-pillow
-python-dotenv
+# Image Processing (For OCR and label analysis)
+Pillow>=10.0.0
 
 # Utilities
-requests
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Production Server (Recommended for Cloud Shell/deployment)
+gunicorn>=21.2.0
